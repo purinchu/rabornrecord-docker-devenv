@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# Run this script to start Docker with the proper development environment container
+# No options are available.
+# Assumes the user has already authenticated separately (for now).
+
+AUTH_CONTAINER_NAME="gcloud-config"
+GCLOUD_BASE_DOCKER_IMAGE="google/cloud-sdk:alpine"
+
+# Check for whether we have setup the container volume holding cached auth yet
+
+docker                         \
+    inspect -f '{{ .Mounts }}' \
+    ${AUTH_CONTAINER_NAME}     \
+    | grep -q 'root.\.config'
+
+if [ "$?" = 0 ]; then
+    # Success
+    docker run --rm -it --volumes-from ${AUTH_CONTAINER_NAME} ${GCLOUD_BASE_DOCKER_IMAGE}
+
+    exit $?
+else
+    # Failure
+    echo <<EOF
+Could not verify that you've already setup authentication into the dev environment
+container.
+
+Please run
+    docker run -it --name ${AUTH_CONTAINER_NAME} ${GCLOUD_BASE_DOCKER_IMAGE} gcloud auth login
+
+(this launches a new container based off of Google Cloud SDK Docker image and saves the container,
+including embedded authentication information, with the name ${AUTH_CONTAINER_NAME})
+EOF
+
+    exit 1
+fi

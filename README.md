@@ -28,6 +28,12 @@ First install dependencies:
 - In the future this will change so that we have a Dockerfile here to build a more specific image
   but hey, Agile, right?
 
+# Launching development environment
+
+- Use `./start-dev-env` to start the right Docker container with the
+  authentication information that you added earlier (based on the
+  cloud-sdk-docker instructions linked above) already embedded.
+
 # Author
 
  - Michael Pyne
