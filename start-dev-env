@@ -4,22 +4,24 @@
 # No options are available.
 # Assumes the user has already authenticated separately (for now).
 
+if [ "x$GCP_PROJECT" = "x" ]; then
+    echo "No default Google cloud project is assigned.  To set one, export"
+    echo "GCP_PROJECT to the project *ID* (not the name) of the GCP project"
+    echo "to work on by default, and then run this again."
+
+    exit 1
+fi
+
 AUTH_CONTAINER_NAME="gcloud-config"
-GCLOUD_BASE_DOCKER_IMAGE="google/cloud-sdk:alpine"
+GCLOUD_BASE_DOCKER_IMAGE="${GCP_PROJECT}-devenv"
 
 # Check for whether we have setup the container volume holding cached auth yet
-
 docker                         \
     inspect -f '{{ .Mounts }}' \
     ${AUTH_CONTAINER_NAME}     \
     | grep -q 'root.\.config'
 
-if [ "$?" = 0 ]; then
-    # Success
-    docker run --rm -it --volumes-from ${AUTH_CONTAINER_NAME} ${GCLOUD_BASE_DOCKER_IMAGE}
-
-    exit $?
-else
+if [ "$?" != 0 ]; then
     # Failure
     echo <<EOF
 Could not verify that you've already setup authentication into the dev environment
@@ -34,3 +36,8 @@ EOF
 
     exit 1
 fi
+
+# Success
+docker run --rm -it --volumes-from ${AUTH_CONTAINER_NAME} ${GCLOUD_BASE_DOCKER_IMAGE}
+
+exit $?

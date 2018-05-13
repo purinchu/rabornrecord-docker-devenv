@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Run this to build the customized Docker-based development environment, which
+# you can then use the start-dev-env script to launch.
+if [ "x$GCP_PROJECT" = "x" ]; then
+    echo "No default Google cloud project is assigned.  To set one, export"
+    echo "GCP_PROJECT to the project *ID* (not the name) of the GCP project"
+    echo "to work on by default, and then run this again."
+
+    exit 1
+fi
+
+docker                                                   \
+    build --build-arg default-gcp-project=${GCP_PROJECT} \
+    -t ${GCP_PROJECT}-devenv:latest                      \
+    .
